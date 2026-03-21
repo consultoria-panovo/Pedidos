@@ -40,7 +40,7 @@ app.get("/pedidos/pal3", async (req, res) => {
          AND E.MATNR = P.MATNR
       WHERE E.MATKL IN ('mm06', 'mp10') 
         AND E.WERKS = 'PAL3'
-        AND E.EINDT >= '2026-01-01'
+        AND E.EINDT >= '2026-03-01'
       ORDER BY E.EINDT ASC;
     `);
 
