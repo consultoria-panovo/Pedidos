@@ -32,7 +32,7 @@ app.get("/pedidos", async (req, res) => {
       FROM EntregasDePedidosDeCompras
       WHERE MATKL IN ('mm06', 'mp10') 
         AND WERKS IN ('PAL3', 'PAL4')
-        AND EINDT >= '2025-01-01'  -- Solo pedidos del 2025 en adelante
+        AND EINDT >= '2026-01-01'  -- Solo pedidos del 2025 en adelante
       ORDER BY EINDT ASC;
     `);
 
