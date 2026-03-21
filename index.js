@@ -11,29 +11,34 @@ const config = {
   options: {
     encrypt: true,
     trustServerCertificate: false
-  }
+  },
+  requestTimeout: 60000 
 };
 
-// Endpoint para leer Entregas de Pedidos de Compras (Filtrado)
+// Endpoint para leer Entregas de Pedidos de Compras (Uniendo EKPO para traer cantidad)
 app.get("/pedidos", async (req, res) => {
   try {
     const pool = await sql.connect(config);
 
-    // Consulta SQL con los filtros solicitados por el usuario
+    // Consulta SQL con INNER JOIN para traer la cantidad (MENGE) y Unidad (MEINS)
     const result = await pool.request().query(`
-      SELECT 
-          MATKL, 
-          MATNR, 
-          TXZ01, 
-          EBELN, 
-          EBELP, 
-          WERKS, 
-          EINDT
-      FROM EntregasDePedidosDeCompras
-      WHERE MATKL IN ('mm06', 'mp10') 
-        AND WERKS IN ('PAL3', 'PAL4')
-        AND EINDT >= '2026-01-01'  -- Solo pedidos del 2025 en adelante
-      ORDER BY EINDT ASC;
+      SELECT DISTINCT
+          E.MATKL, 
+          E.MATNR, 
+          E.TXZ01, 
+          E.EBELN, 
+          E.EBELP, 
+          E.WERKS, 
+          E.EINDT,
+          P.MENGE,  -- <--- La cantidad viene de la tabla EKPO
+          P.MEINS   -- <--- La unidad de medida (ej. KG, PZA)
+      FROM EntregasDePedidosDeCompras E
+      INNER JOIN PedidosDeCompra_ekpo P 
+          ON E.EBELN = P.EBELN AND E.MATNR = P.MATNR
+      WHERE E.MATKL IN ('mm06', 'mp10') 
+        AND E.WERKS IN ('PAL3', 'PAL4')
+        AND E.EINDT >= '2026-01-01'
+      ORDER BY E.EINDT ASC;
     `);
 
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,8 +48,7 @@ app.get("/pedidos", async (req, res) => {
   }
 });
 
-// Puedes cambiar el puerto si vas a correr ambas APIs en el mismo servidor local
 const PORT = process.env.PORT || 3001; 
 app.listen(PORT, () => {
-  console.log(`API Pedidos corriendo en puerto ${PORT} con filtros de material y centro`);
+  console.log(`API Pedidos corriendo en puerto ${PORT} con JOIN de cantidades`);
 });
