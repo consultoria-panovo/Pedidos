@@ -15,12 +15,13 @@ const config = {
   requestTimeout: 60000 
 };
 
-// Endpoint para leer Entregas de Pedidos de Compras (Uniendo EKPO para traer cantidad)
-app.get("/pedidos", async (req, res) => {
+// ---------------------------------------------------
+// Endpoint para leer Pedidos PAL3
+// ---------------------------------------------------
+app.get("/pedidos/pal3", async (req, res) => {
   try {
     const pool = await sql.connect(config);
 
-    // Consulta SQL con INNER JOIN para traer la cantidad (MENGE) y Unidad (MEINS)
     const result = await pool.request().query(`
       SELECT DISTINCT
           E.MATKL, 
@@ -30,13 +31,51 @@ app.get("/pedidos", async (req, res) => {
           E.EBELP, 
           E.WERKS, 
           E.EINDT,
-          P.MENGE,  -- <--- La cantidad viene de la tabla EKPO
-          P.MEINS   -- <--- La unidad de medida (ej. KG, PZA)
+          P.MENGE,
+          P.MEINS
       FROM EntregasDePedidosDeCompras E
       INNER JOIN PedidosDeCompra_ekpo P 
-          ON E.EBELN = P.EBELN AND E.MATNR = P.MATNR
+          ON E.EBELN = P.EBELN 
+         AND E.EBELP = P.EBELP  -- <- Unimos también por posición para evitar duplicados masivos
+         AND E.MATNR = P.MATNR
       WHERE E.MATKL IN ('mm06', 'mp10') 
-        AND E.WERKS IN ('PAL3', 'PAL4')
+        AND E.WERKS = 'PAL3'
+        AND E.EINDT >= '2026-01-01'
+      ORDER BY E.EINDT ASC;
+    `);
+
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: err.toString() });
+  }
+});
+
+// ---------------------------------------------------
+// Endpoint para leer Pedidos PAL4
+// ---------------------------------------------------
+app.get("/pedidos/pal4", async (req, res) => {
+  try {
+    const pool = await sql.connect(config);
+
+    const result = await pool.request().query(`
+      SELECT DISTINCT
+          E.MATKL, 
+          E.MATNR, 
+          E.TXZ01, 
+          E.EBELN, 
+          E.EBELP, 
+          E.WERKS, 
+          E.EINDT,
+          P.MENGE,
+          P.MEINS
+      FROM EntregasDePedidosDeCompras E
+      INNER JOIN PedidosDeCompra_ekpo P 
+          ON E.EBELN = P.EBELN 
+         AND E.EBELP = P.EBELP 
+         AND E.MATNR = P.MATNR
+      WHERE E.MATKL IN ('mm06', 'mp10') 
+        AND E.WERKS = 'PAL4'
         AND E.EINDT >= '2026-01-01'
       ORDER BY E.EINDT ASC;
     `);
@@ -50,5 +89,5 @@ app.get("/pedidos", async (req, res) => {
 
 const PORT = process.env.PORT || 3001; 
 app.listen(PORT, () => {
-  console.log(`API Pedidos corriendo en puerto ${PORT} con JOIN de cantidades`);
+  console.log(`API Pedidos corriendo en puerto ${PORT} dividida por centros PAL3 y PAL4`);
 });
