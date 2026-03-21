@@ -32,7 +32,7 @@ app.get("/pedidos", async (req, res) => {
       FROM EntregasDePedidosDeCompras
       WHERE MATKL IN ('mm06', 'mp10') 
         AND WERKS IN ('PAL3', 'PAL4')
-        AND EINDT >= DATEADD(day, -30, GETDATE()) -- <--- ¡Filtro Mágico! Solo de hace 30 días hacia el futuro
+        AND EINDT >= '2025-01-01'  -- Solo pedidos del 2025 en adelante
       ORDER BY EINDT ASC;
     `);
 
