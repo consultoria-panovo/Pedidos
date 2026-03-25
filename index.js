@@ -23,7 +23,7 @@ app.get("/pedidos/pal3", async (req, res) => {
     const pool = await sql.connect(config);
 
     const result = await pool.request().query(`
-      SELECT 
+      SELECT DISTINCT
           E.MATKL, 
           E.MATNR, 
           E.TXZ01, 
@@ -31,8 +31,8 @@ app.get("/pedidos/pal3", async (req, res) => {
           E.EBELP, 
           E.WERKS, 
           E.EINDT,
-          MAX(P.MENGE) AS MENGE,
-          MAX(P.MEINS) AS MEINS
+          P.MENGE,
+          P.MEINS
       FROM EntregasDePedidosDeCompras E
       INNER JOIN PedidosDeCompra_ekpo P 
           ON E.EBELN = P.EBELN 
@@ -41,8 +41,6 @@ app.get("/pedidos/pal3", async (req, res) => {
       WHERE E.MATKL IN ('mm06', 'mp10') 
         AND E.WERKS = 'PAL3'
         AND E.EINDT >= '2026-01-01'
-      GROUP BY 
-          E.MATKL, E.MATNR, E.TXZ01, E.EBELN, E.EBELP, E.WERKS, E.EINDT
       ORDER BY E.EINDT ASC;
     `);
 
@@ -61,7 +59,7 @@ app.get("/pedidos/pal4", async (req, res) => {
     const pool = await sql.connect(config);
 
     const result = await pool.request().query(`
-      SELECT 
+      SELECT DISTINCT
           E.MATKL, 
           E.MATNR, 
           E.TXZ01, 
@@ -69,8 +67,8 @@ app.get("/pedidos/pal4", async (req, res) => {
           E.EBELP, 
           E.WERKS, 
           E.EINDT,
-          MAX(P.MENGE) AS MENGE,
-          MAX(P.MEINS) AS MEINS
+          P.MENGE,
+          P.MEINS
       FROM EntregasDePedidosDeCompras E
       INNER JOIN PedidosDeCompra_ekpo P 
           ON E.EBELN = P.EBELN 
@@ -79,8 +77,6 @@ app.get("/pedidos/pal4", async (req, res) => {
       WHERE E.MATKL IN ('mm06', 'mp10') 
         AND E.WERKS = 'PAL4'
         AND E.EINDT >= '2026-01-01'
-      GROUP BY 
-          E.MATKL, E.MATNR, E.TXZ01, E.EBELN, E.EBELP, E.WERKS, E.EINDT
       ORDER BY E.EINDT ASC;
     `);
 
