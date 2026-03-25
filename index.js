@@ -40,6 +40,7 @@ app.get("/pedidos/pal3", async (req, res) => {
          AND E.MATNR = P.MATNR
       WHERE E.MATKL IN ('mm06', 'mp10') 
         AND E.WERKS = 'PAL3'
+        AND E.EINDT >= '2026-01-01'
         -- 🔥 EL CAMBIO MAGICO: Filtra desde la fecha de HOY en adelante (formato YYYYMMDD)
         AND E.EINDT >= CONVERT(VARCHAR(8), GETDATE(), 112)
       ORDER BY E.EINDT ASC;
@@ -77,6 +78,7 @@ app.get("/pedidos/pal4", async (req, res) => {
          AND E.MATNR = P.MATNR
       WHERE E.MATKL IN ('mm06', 'mp10') 
         AND E.WERKS = 'PAL4'
+        AND E.EINDT >= '2026-03-01'
         -- 🔥 EL CAMBIO MAGICO: Filtra desde la fecha de HOY en adelante (formato YYYYMMDD)
         AND E.EINDT >= CONVERT(VARCHAR(8), GETDATE(), 112)
       ORDER BY E.EINDT ASC;
